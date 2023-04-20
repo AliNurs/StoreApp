@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:taskproject/future/data/model/store_entity.dart';
-import 'package:taskproject/future/data/model/store_model.dart';
+import 'package:taskproject/future/data/repository/store_repository.dart';
 import 'package:taskproject/future/presentation/provider/store_provider.dart';
+import 'package:taskproject/core/cache/cache_image.dart';
 import 'package:taskproject/future/presentation/screens/detail_screen.dart';
-import 'package:taskproject/future/presentation/widgets/form_screen.dart';
+import 'package:taskproject/future/presentation/screens/form_screen.dart';
 import 'package:taskproject/future/presentation/widgets/my_list.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -12,14 +12,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    StoreModel singleProduct;
     final vm = context.watch<StoreProvider>();
 
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-      floatingActionButton: Column(
-        children: [],
-      ),
       appBar: AppBar(
         title: const Text('StoreApp'),
         centerTitle: true,
@@ -44,51 +39,63 @@ class HomeScreen extends StatelessWidget {
                 );
               }),
           const SizedBox(width: 8),
+          // CasheImageWidget(url: 'https://fakestoreapi.com/products')
         ],
       ),
-      body: ListView(
-        children: [
-          if (vm.isLoading) const Center(child: CircularProgressIndicator()),
-          if (vm.allProducts.isEmpty &&
-              vm.errorMessage.isEmpty &&
-              !vm.isLoading)
-            const Text(
-              'Список пуст. Загрузите данные!',
-              textAlign: TextAlign.center,
-            ),
-          if (vm.errorMessage.isEmpty &&
-              vm.allProducts.isNotEmpty &&
-              !vm.isLoading)
-            ...vm.allProducts.map(
-              (e) => Dismissible(
-                onDismissed: (direction) {
-                  vm.deleteProduct(product: e);
-                },
-                key: ValueKey(e),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailScreen(detailModel: e),
-                      ),
-                    );
-                    //  e.id;
+      body:
+       NotificationListener(
+        onNotification: (ScrollNotification notification) {
+          final max = notification.metrics.maxScrollExtent;
+          final current = notification.metrics.pixels + 100;
+          if (current >= max) {
+            vm.getProducts();
+          }
+          return true;
+        },
+        child: ListView(
+          children: [
+            if (vm.isLoading && vm.allProducts.isEmpty)
+              const Center(child: CircularProgressIndicator()),
+            if (vm.allProducts.isEmpty &&
+                vm.errorMessage.isEmpty &&
+                !vm.isLoading)
+              const Text(
+                'Список пуст. Загрузите данные!',
+                textAlign: TextAlign.center,
+              ),
+            if (vm.errorMessage.isEmpty &&
+                vm.allProducts.isNotEmpty &&
+                !vm.isLoading)
+              ...vm.allProducts.map(
+                (e) => Dismissible(
+                  onDismissed: (direction) {
+                    vm.deleteProduct(product: e);
                   },
-                  child: MyList(
-                      category: e.category ?? '',
-                      id: e.id ?? 1,
-                      title: e.title ?? '',
-                      image: e.image ?? ''),
+                  key: ValueKey(e),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailScreen(detailModel: e),
+                        ),
+                      );
+                    },
+                    child: MyList(
+                        category: e.category ?? '',
+                        id: e.id ?? 1,
+                        title: e.title ?? '',
+                        image: e.image ?? ''),
+                  ),
                 ),
               ),
-            ),
-          if (vm.errorMessage.isNotEmpty && !vm.isLoading)
-            Text(
-              vm.errorMessage,
-              textAlign: TextAlign.center,
-            )
-        ],
+            if (vm.errorMessage.isNotEmpty && !vm.isLoading)
+              Text(
+                vm.errorMessage,
+                textAlign: TextAlign.center,
+              )
+          ],
+        ),
       ),
     );
   }

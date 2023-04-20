@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:taskproject/future/data/model/store_entity.dart';
 import 'package:taskproject/future/data/model/store_model.dart';
 import 'package:taskproject/future/presentation/provider/store_provider.dart';
 import 'package:taskproject/future/presentation/widgets/custom_textfield.dart';

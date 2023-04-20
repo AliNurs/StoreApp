@@ -9,16 +9,15 @@ class StoreModel {
   String? description;
   String? category;
   String? image;
-  Rating? rating;
 
-  StoreModel(
-      {this.id,
-      this.title,
-      this.price,
-      this.description,
-      this.category,
-      this.image,
-      this.rating});
+  StoreModel({
+    this.id,
+    this.title,
+    this.price,
+    this.description,
+    this.category,
+    this.image,
+  });
 
   StoreModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -27,7 +26,6 @@ class StoreModel {
     description = json['description'];
     category = json['category'];
     image = json['image'];
-    rating = json['rating'] != null ? Rating.fromJson(json['rating']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -38,28 +36,6 @@ class StoreModel {
     data['description'] = this.description;
     data['category'] = this.category;
     data['image'] = this.image;
-    if (this.rating != null) {
-      data['rating'] = this.rating!.toJson();
-    }
-    return data;
-  }
-}
-
-class Rating {
-  num? rate;
-  num? count;
-
-  Rating({this.rate, this.count});
-
-  Rating.fromJson(Map<String, dynamic> json) {
-    rate = json['rate'];
-    count = json['count'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['rate'] = this.rate;
-    data['count'] = this.count;
     return data;
   }
 }

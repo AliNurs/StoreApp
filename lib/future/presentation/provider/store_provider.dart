@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:taskproject/future/data/model/store_entity.dart';
 import 'package:taskproject/future/data/model/store_model.dart';
 
 import 'package:taskproject/future/data/repository/store_repository.dart';
@@ -14,15 +13,21 @@ class StoreProvider with ChangeNotifier {
   String errorMessage = '';
   final StoreRepo storeRepo;
   List<StoreModel> allProducts = [];
+  List<StoreModel> oldProducts = [];
   StoreModel? oldProduct = StoreModel();
   StoreModel thisProduct = StoreModel();
+  int page = 0;
 
   Future<void> getProducts() async {
-    isLoading = true;
+    // isLoading = true;
+
     await Future.delayed(const Duration(seconds: 2));
     notifyListeners();
     try {
-      allProducts = await storeRepo.getProductsRepo();
+      page++;
+      final d = await storeRepo.getProductsRepo(page: page);
+      oldProducts.addAll(d);
+      allProducts = oldProducts;
       isLoading = false;
     } catch (error) {
       isLoading = false;
@@ -32,7 +37,6 @@ class StoreProvider with ChangeNotifier {
   }
 
   Future<void> getProduct({StoreModel? product}) async {
-    //Exception: type 'List<StoreModel>' is not a subtype of type 'StoreModel?'
     thisProduct = await storeRepo.getDetailProductsRepo(id: product?.id);
     oldProduct = product;
     notifyListeners();
